@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Secure Login</title>
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        <script src="https://www.google.com/recaptcha/api.js?render=6LcBLyIrAAAAAH5qAd5bjgEwSN9XJqgBcpA40sxw"></script>
+        <script>
+            function onClick(e) {
+                e.preventDefault(); // Evita que el formulario se envíe inmediatamente
+                grecaptcha.ready(function() {
+                    grecaptcha.execute('6LcBLyIrAAAAAH5qAd5bjgEwSN9XJqgBcpA40sxw', {action: 'submit'})
+                        .then(function(token) {
+                            // Inserta el token en el campo oculto
+                            document.getElementById('g-recaptcha-response').value = token;
+                            // Envía el formulario
+                            document.getElementById('login-form').submit();
+                        })
+                        .catch(function(error) {
+                            console.error('Error al ejecutar reCAPTCHA:', error);
+                            alert('Error al verificar reCAPTCHA. Inténtalo de nuevo.');
+                        });
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <div class="form-container">
+            <!-- Mostrar mensajes -->
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li class="{{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+    
+            <form id="login-form" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                <button type="submit" onclick="onClick(event)">Login</button>
+            </form>
+            <div class="footer-text">
+                <p>¿Olvidaste tu contraseña? <a href="{% url 'password_reset' %}">Recupérala aquí</a>.</p>
+                <p>¿Primera vez? <a href="{% url 'registro' %}">Regístrate aquí</a>.</p>
+            </div>
+        </div>
+    </body>
+</html>
